@@ -244,29 +244,29 @@ const StoreScreen = () => {
     // Add animation
     setAnimatingItems(prev => new Set([...prev, product.id]));
     
-    // Enhanced cart animation with bounce effect
+    // Enhanced cart animation with bounce effect (reduced duration)
     Animated.sequence([
       Animated.timing(cartAnimation, {
         toValue: 1,
-        duration: 150,
+        duration: 80, // Reduced from 150ms to 80ms
         useNativeDriver: true,
       }),
       Animated.spring(cartAnimation, {
         toValue: 0,
-        tension: 100,
-        friction: 3,
+        tension: 150, // Increased tension for faster spring
+        friction: 4, // Increased friction for quicker settling
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Remove from animating items after animation
+    // Remove from animating items after animation (reduced timeout)
     setTimeout(() => {
       setAnimatingItems(prev => {
         const newSet = new Set(prev);
         newSet.delete(product.id);
         return newSet;
       });
-    }, 1200);
+    }, 600); // Reduced from 1200ms to 600ms for faster cleanup
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -688,9 +688,9 @@ const styles = StyleSheet.create({
   },
   cartButtonContainer: {
     position: 'absolute',
-    top: 50, // Increased to avoid navigation bar overlap
-    right: 20,
-    zIndex: 100,
+    bottom: 100, // Positioned in bottom left (above tab bar)
+    left: 20, // Left side positioning
+    zIndex: 1000, // Higher z-index to ensure it's on top
   },
   filterSection: {
     paddingHorizontal: 15,
@@ -701,22 +701,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primaryAccent,
-    paddingHorizontal: 16, // Increased horizontal padding
-    paddingVertical: 10, // Increased vertical padding
-    borderRadius: 20, // Increased border radius for bigger button
+    paddingHorizontal: 14, // Slightly reduced for corner positioning
+    paddingVertical: 8, // Slightly reduced for corner positioning
+    borderRadius: 18, // Slightly reduced for corner positioning
     position: 'relative',
-    minHeight: 44, // Minimum touch target size
+    minHeight: 40, // Slightly reduced for corner positioning
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // Add shadow for better visibility
   },
   cartBadge: {
     position: 'absolute',
-    top: -6,
-    right: -6,
+    top: -5,
+    right: -5,
     backgroundColor: Colors.errorColor,
-    borderRadius: 12, // Increased border radius
-    minWidth: 24, // Increased width
-    height: 24, // Increased height
+    borderRadius: 10, // Adjusted for corner positioning
+    minWidth: 20, // Adjusted for corner positioning
+    height: 20, // Adjusted for corner positioning
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.cardBackground, // White border for better visibility
   },
   cartBadgeText: {
     color: '#FFFFFF', // White text for red badge
