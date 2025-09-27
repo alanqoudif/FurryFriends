@@ -22,6 +22,7 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const [appointmentModalVisible, setAppointmentModalVisible] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState(null);
+  const [currentClinicIndex, setCurrentClinicIndex] = useState(0);
 
   const quickServices = [
     { name: 'عيادات بيطرية', icon: 'medical', color: Colors.primaryAccent },
@@ -30,11 +31,11 @@ const HomeScreen = () => {
     { name: 'خدمات الطوارئ', icon: 'call', color: '#FF3B30' },
   ];
 
-  const stores = [
-    { name: 'مستلزمات قطط', icon: 'logo-octocat', color: '#FF9500' },
-    { name: 'مستلزمات كلاب', icon: 'paw', color: '#9B59B6' },
-    { name: 'ألعاب حيوانات', icon: 'game-controller', color: '#E74C3C' },
-    { name: 'عروض خاصة', icon: 'gift', color: '#E91E63' },
+  const bestVetServices = [
+    { name: 'فحص شامل', icon: 'medical', color: Colors.primaryAccent, description: 'فحص شامل للحيوان الأليف' },
+    { name: 'جراحة', icon: 'cut', color: '#FF3B30', description: 'عمليات جراحية متخصصة' },
+    { name: 'تطعيم', icon: 'shield-checkmark', color: Colors.successColor, description: 'تطعيمات وقائية' },
+    { name: 'طوارئ', icon: 'call', color: '#FFD700', description: 'خدمات الطوارئ 24/7' },
   ];
 
   const featuredProducts = [
@@ -72,34 +73,33 @@ const HomeScreen = () => {
     },
   ];
 
-  const clinics = [
+  const closestClinics = [
     {
       id: 1,
       name: 'عيادة أقدام سعيدة',
-      offer: 'خدمة مجانية',
-      rating: 4.5,
-      reviews: 1000,
-      distance: '0.5 كم',
-      image: 'https://via.placeholder.com/80x80/4A90E2/FFFFFF?text=عيادة',
+      address: 'شارع الملك فهد، حي النخيل، الرياض',
+      phone: '+966 11 123 4567',
+      rating: 4.8,
+      reviews: 1247,
+      distance: '0.3 كم',
+      image: 'https://via.placeholder.com/300x200/4A90E2/FFFFFF?text=عيادة+أقدام+سعيدة',
+      services: ['فحص شامل', 'جراحة', 'تطعيم', 'طوارئ', 'استشارة'],
+      openHours: '24/7',
+      specialOffer: 'فحص مجاني للعملاء الجدد'
     },
     {
       id: 2,
-      name: 'مركز رعاية الحيوانات',
-      offer: 'خصم 20%',
-      rating: 4.8,
-      reviews: 850,
-      distance: '1.2 كم',
-      image: 'https://via.placeholder.com/80x80/50C878/FFFFFF?text=مركز',
-    },
-    {
-      id: 3,
-      name: 'مستشفى الحيوانات',
-      offer: 'فحص مجاني',
+      name: 'مركز رعاية الحيوانات المتقدم',
+      address: 'شارع العليا، حي العليا، الرياض',
+      phone: '+966 11 987 6543',
       rating: 4.9,
-      reviews: 1200,
-      distance: '2.1 كم',
-      image: 'https://via.placeholder.com/80x80/FF6B6B/FFFFFF?text=مستشفى',
-    },
+      reviews: 892,
+      distance: '0.7 كم',
+      image: 'https://via.placeholder.com/300x200/50C878/FFFFFF?text=مركز+رعاية+الحيوانات',
+      services: ['فحص شامل', 'جراحة متقدمة', 'تطعيم', 'طوارئ', 'استشارة', 'علاج طبيعي'],
+      openHours: '6:00 ص - 12:00 م',
+      specialOffer: 'خصم 20% على الجراحات'
+    }
   ];
 
   const handleClinicPress = (clinic: any) => {
@@ -107,17 +107,29 @@ const HomeScreen = () => {
     setAppointmentModalVisible(true);
   };
 
-  const handleStorePress = (store: any) => {
-    // Navigate to store products with category filter
+  const handleClosestClinicPress = (clinic: any) => {
+    setSelectedClinic(clinic);
+    setAppointmentModalVisible(true);
+  };
+
+  const handleClinicScroll = (event: any) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const viewSize = width - 20; // Same as snapToInterval
+    const currentIndex = Math.round(contentOffsetX / viewSize);
+    setCurrentClinicIndex(currentIndex);
+  };
+
+  const handleVetServicePress = (service: any) => {
+    // Navigate to clinics screen
     Alert.alert(
-      store.name,
-      `هل تريد تصفح منتجات ${store.name}؟`,
+      service.name,
+      service.description,
       [
         { text: 'إلغاء', style: 'cancel' },
         { 
-          text: 'تصفح المنتجات', 
+          text: 'حجز موعد', 
           onPress: () => {
-            navigation.navigate('Store' as never, { category: store.name } as never);
+            navigation.navigate('Orders' as never);
           }
         }
       ]
@@ -172,16 +184,16 @@ const HomeScreen = () => {
           />
         </View>
 
-        {/* Stores Section - First */}
+        {/* Best Vet Services Section - First */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>أهم المتاجر</Text>
+          <Text style={styles.sectionTitle}>أفضل الخدمات البيطرية</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storesScroll}>
-            {stores.map((store, index) => (
-              <TouchableOpacity key={index} style={styles.storeCard} onPress={() => handleStorePress(store)}>
-                <View style={[styles.storeIcon, { backgroundColor: store.color }]}>
-                  <Ionicons name={store.icon as any} size={32} color="#fff" />
+            {bestVetServices.map((service, index) => (
+              <TouchableOpacity key={index} style={styles.storeCard} onPress={() => handleVetServicePress(service)}>
+                <View style={[styles.storeIcon, { backgroundColor: service.color }]}>
+                  <Ionicons name={service.icon as any} size={32} color="#fff" />
                 </View>
-                <Text style={styles.storeName}>{store.name}</Text>
+                <Text style={styles.storeName}>{service.name}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -208,57 +220,89 @@ const HomeScreen = () => {
           </ScrollView>
         </View>
 
-        {/* Quick Services Section */}
+        {/* Closest Clinics Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>خدمات سريعة</Text>
-          <View style={styles.servicesGrid}>
-            {quickServices.map((service, index) => (
-              <TouchableOpacity key={index} style={styles.serviceItem}>
-                <View style={[styles.serviceIcon, { backgroundColor: service.color }]}>
-                  <Ionicons name={service.icon as any} size={24} color="#fff" />
-                </View>
-                <Text style={styles.serviceName}>{service.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Clinics Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>أفضل الخدمات البيطرية</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.clinicsScroll}>
-            {clinics.map((clinic) => (
-              <TouchableOpacity key={clinic.id} style={styles.clinicCard} onPress={() => handleClinicPress(clinic)}>
-                <Image source={{ uri: clinic.image }} style={styles.clinicImage} />
-                <View style={styles.clinicInfo}>
-                  <Text style={styles.clinicName}>{clinic.name}</Text>
-                  <Text style={styles.clinicOffer}>{clinic.offer}</Text>
-                  <View style={styles.clinicRating}>
-                    <Ionicons name="star" size={14} color="#FFD700" />
-                    <Text style={styles.ratingText}>{clinic.rating}</Text>
-                    <Text style={styles.reviewsText}>({clinic.reviews}+)</Text>
+          <Text style={styles.sectionTitle}>العيادات الأقرب إليك</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.clinicsScroll}
+            snapToInterval={width - 20}
+            snapToAlignment="start"
+            decelerationRate="fast"
+            contentContainerStyle={styles.clinicsScrollContent}
+            onScroll={handleClinicScroll}
+            scrollEventThrottle={16}
+          >
+            {closestClinics.map((clinic) => (
+              <TouchableOpacity key={clinic.id} style={styles.closestClinicCard} onPress={() => handleClosestClinicPress(clinic)}>
+                <Image source={{ uri: clinic.image }} style={styles.closestClinicImage} />
+                <View style={styles.closestClinicInfo}>
+                  <View style={styles.closestClinicHeader}>
+                    <Text style={styles.closestClinicName}>{clinic.name}</Text>
+                    <View style={styles.closestClinicRating}>
+                      <Ionicons name="star" size={16} color="#FFD700" />
+                      <Text style={styles.ratingText}>{clinic.rating}</Text>
+                      <Text style={styles.reviewsText}>({clinic.reviews}+)</Text>
+                    </View>
                   </View>
-                  <Text style={styles.clinicDistance}>{clinic.distance}</Text>
+                  
+                  <View style={styles.closestClinicLocation}>
+                    <Ionicons name="location" size={16} color={Colors.primaryAccent} />
+                    <Text style={styles.closestClinicAddress}>{clinic.address}</Text>
+                  </View>
+                  
+                  <View style={styles.closestClinicContact}>
+                    <Ionicons name="call" size={16} color={Colors.primaryAccent} />
+                    <Text style={styles.closestClinicPhone}>{clinic.phone}</Text>
+                  </View>
+                  
+                  <View style={styles.closestClinicHours}>
+                    <Ionicons name="time" size={16} color={Colors.primaryAccent} />
+                    <Text style={styles.closestClinicHoursText}>مفتوح {clinic.openHours}</Text>
+                  </View>
+                  
+                  <View style={styles.closestClinicDistance}>
+                    <Ionicons name="walk" size={16} color={Colors.successColor} />
+                    <Text style={styles.closestClinicDistanceText}>{clinic.distance}</Text>
+                  </View>
+                  
+                  <View style={styles.closestClinicServices}>
+                    <Text style={styles.closestClinicServicesTitle}>الخدمات المتاحة:</Text>
+                    <View style={styles.closestClinicServicesList}>
+                      {clinic.services.map((service, index) => (
+                        <View key={index} style={styles.closestClinicServiceTag}>
+                          <Text style={styles.closestClinicServiceText}>{service}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                  
+                  <View style={styles.closestClinicOffer}>
+                    <Ionicons name="gift" size={16} color={Colors.successColor} />
+                    <Text style={styles.closestClinicOfferText}>{clinic.specialOffer}</Text>
+                  </View>
+                  
+                  <TouchableOpacity style={styles.closestClinicBookButton}>
+                    <Text style={styles.closestClinicBookButtonText}>حجز موعد الآن</Text>
+                    <Ionicons name="arrow-forward" size={16} color="#fff" />
+                  </TouchableOpacity>
                 </View>
               </TouchableOpacity>
             ))}
           </ScrollView>
-        </View>
-
-        {/* Points Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>استخدم النقاط ووفر</Text>
-          <View style={styles.pointsContainer}>
-            <View style={styles.pointsCard}>
-              <View style={styles.pointsInfo}>
-                <Text style={styles.pointsNumber}>2,394</Text>
-                <Text style={styles.pointsLabel}>نقطة</Text>
-              </View>
-              <Ionicons name="gift" size={24} color={Colors.primaryAccent} />
-            </View>
-            <TouchableOpacity style={styles.couponsButton}>
-              <Text style={styles.couponsText}>كوبونات</Text>
-            </TouchableOpacity>
+          
+          {/* Dots Indicator */}
+          <View style={styles.dotsContainer}>
+            {closestClinics.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  index === currentClinicIndex && styles.activeDot
+                ]}
+              />
+            ))}
           </View>
         </View>
 
@@ -284,7 +328,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.primaryBackground,
+    backgroundColor: '#FAFAFA', // Off-white background
   },
   scrollView: {
     flex: 1,
@@ -320,10 +364,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 25,
     shadowColor: Colors.shadowColor,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
     borderWidth: 1,
     borderColor: Colors.glassBorder,
   },
@@ -393,12 +437,12 @@ const styles = StyleSheet.create({
     width: 120,
     alignItems: 'center',
     shadowColor: Colors.shadowColor,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: Colors.glassBorder,
+    borderColor: 'rgba(138, 43, 226, 0.2)', // Subtle purple hint
   },
   storeIcon: {
     width: 60,
@@ -416,6 +460,8 @@ const styles = StyleSheet.create({
   },
   clinicsScroll: {
     marginHorizontal: -20,
+  },
+  clinicsScrollContent: {
     paddingHorizontal: 20,
   },
   clinicCard: {
@@ -531,12 +577,12 @@ const styles = StyleSheet.create({
     marginRight: 15,
     width: 160,
     shadowColor: Colors.shadowColor,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: Colors.glassBorder,
+    borderColor: 'rgba(138, 43, 226, 0.2)', // Subtle purple hint
   },
   productImage: {
     width: '100%',
@@ -573,6 +619,173 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: Colors.primaryAccent,
+  },
+  // Closest Clinic Styles
+  closestClinicCard: {
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 16,
+    marginRight: 20,
+    width: width - 40, // Full width minus horizontal padding
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    overflow: 'hidden',
+  },
+  closestClinicImage: {
+    width: '100%',
+    height: 180,
+  },
+  closestClinicInfo: {
+    padding: 15,
+  },
+  closestClinicHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  closestClinicName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.primaryText,
+    flex: 1,
+    textAlign: getTextAlign(),
+  },
+  closestClinicRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reviewsText: {
+    fontSize: 12,
+    color: Colors.secondaryText,
+    marginLeft: 4,
+  },
+  closestClinicLocation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  closestClinicAddress: {
+    fontSize: 14,
+    color: Colors.secondaryText,
+    marginLeft: 8,
+    flex: 1,
+    textAlign: getTextAlign(),
+  },
+  closestClinicContact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  closestClinicPhone: {
+    fontSize: 14,
+    color: Colors.secondaryText,
+    marginLeft: 8,
+  },
+  closestClinicHours: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  closestClinicHoursText: {
+    fontSize: 14,
+    color: Colors.successColor,
+    marginLeft: 8,
+    fontWeight: '600',
+  },
+  closestClinicDistance: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  closestClinicDistanceText: {
+    fontSize: 14,
+    color: Colors.successColor,
+    marginLeft: 8,
+    fontWeight: '600',
+  },
+  closestClinicServices: {
+    marginBottom: 12,
+  },
+  closestClinicServicesTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primaryText,
+    marginBottom: 6,
+    textAlign: getTextAlign(),
+  },
+  closestClinicServicesList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  closestClinicServiceTag: {
+    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.primaryAccent,
+  },
+  closestClinicServiceText: {
+    fontSize: 12,
+    color: Colors.primaryAccent,
+    fontWeight: '600',
+  },
+  closestClinicOffer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.successColor,
+  },
+  closestClinicOfferText: {
+    fontSize: 14,
+    color: Colors.successColor,
+    marginLeft: 8,
+    fontWeight: '600',
+  },
+  closestClinicBookButton: {
+    backgroundColor: Colors.primaryAccent,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    borderRadius: 12,
+  },
+  closestClinicBookButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(138, 43, 226, 0.3)',
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    backgroundColor: Colors.primaryAccent,
+    width: 12,
+    height: 8,
+    borderRadius: 4,
   },
 });
 

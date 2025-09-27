@@ -52,7 +52,7 @@ interface Order {
 
 const ProfileScreen = () => {
   const { user, userData, logout } = useAuth();
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { isDark } = useTheme();
   const colors = useThemeColors();
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
@@ -522,17 +522,6 @@ const ProfileScreen = () => {
               />
             </View>
 
-            <View style={styles.settingItem}>
-              <Text style={[styles.settingLabel, { color: colors.primaryText }]}>
-                {isDark ? 'الوضع المظلم' : 'الوضع الفاتح'}
-              </Text>
-              <Switch
-                value={isDark}
-                onValueChange={toggleTheme}
-                trackColor={{ false: colors.secondaryText, true: colors.primaryAccent }}
-                thumbColor={isDark ? colors.primaryText : colors.secondaryText}
-              />
-            </View>
 
             <TouchableOpacity style={[styles.logoutButton, { backgroundColor: colors.errorColor }]} onPress={handleLogout}>
               <Ionicons name="log-out-outline" size={20} color={colors.primaryText} />
@@ -577,7 +566,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple header
     marginBottom: 5,
   },
   profileEmail: {
@@ -700,7 +689,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   paymentModalContent: {

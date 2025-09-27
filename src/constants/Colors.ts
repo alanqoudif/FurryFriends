@@ -71,7 +71,7 @@ export const LightColors = {
   statusBarBackground: '#FFFFFF',
 };
 
-// Default export for backward compatibility (dark theme)
-export const Colors = DarkColors;
+// Default export for backward compatibility (light theme)
+export const Colors = LightColors;
 
 export default Colors;

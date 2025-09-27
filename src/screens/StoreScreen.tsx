@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useThemeColors } from '../context/ThemeContext';
 import Colors from '../constants/Colors';
 import Theme from '../constants/Theme';
-import { getRTLMargin, getTextAlign } from '../utils/RTLUtils';
+import { getRTLMargin, getRTLPadding, getTextAlign } from '../utils/RTLUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -372,7 +372,7 @@ const StoreScreen = () => {
           </Animated.View>
           {getTotalItems() > 0 && (
             <View style={[styles.cartBadge, { backgroundColor: colors.errorColor }]}>
-              <Text style={[styles.cartBadgeText, { color: colors.primaryText }]}>{getTotalItems()}</Text>
+              <Text style={[styles.cartBadgeText, { color: '#FFFFFF' }]}>{getTotalItems()}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -407,12 +407,12 @@ const StoreScreen = () => {
             <Ionicons
               name={category.icon as any}
               size={16}
-              color={selectedCategory === category.id ? colors.primaryText : colors.secondaryText}
+              color={selectedCategory === category.id ? '#FFFFFF' : colors.secondaryText}
             />
               <Text
                 style={[
                   styles.categoryButtonText,
-                  { color: selectedCategory === category.id ? colors.primaryText : colors.primaryText },
+                  { color: selectedCategory === category.id ? '#FFFFFF' : colors.primaryText },
                   selectedCategory === category.id && { fontWeight: '600' },
                 ]}
               >
@@ -437,12 +437,12 @@ const StoreScreen = () => {
             <Ionicons
               name={petType.icon as any}
               size={14}
-              color={selectedPetType === petType.id ? colors.primaryText : colors.secondaryText}
+              color={selectedPetType === petType.id ? '#FFFFFF' : colors.secondaryText}
             />
               <Text
                 style={[
                   styles.petTypeButtonText,
-                  { color: selectedPetType === petType.id ? colors.primaryText : colors.primaryText },
+                  { color: selectedPetType === petType.id ? '#FFFFFF' : colors.primaryText },
                   selectedPetType === petType.id && { fontWeight: '600' },
                 ]}
               >
@@ -496,7 +496,7 @@ const StoreScreen = () => {
                     <Text
                       style={[
                         styles.addToCartButtonText,
-                        { color: colors.primaryText },
+                        { color: '#FFFFFF' }, // White text for purple button
                       ]}
                     >
                       {animatingItems.has(product.id) ? 'تم الإضافة!' : (product.inStock ? 'إضافة للسلة' : 'نفد المخزون')}
@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
   },
   cartButtonContainer: {
     position: 'absolute',
-    top: 10,
+    top: 50, // Increased to avoid navigation bar overlap
     right: 20,
     zIndex: 100,
   },
@@ -701,25 +701,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primaryAccent,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 16, // Increased horizontal padding
+    paddingVertical: 10, // Increased vertical padding
+    borderRadius: 20, // Increased border radius for bigger button
     position: 'relative',
+    minHeight: 44, // Minimum touch target size
   },
   cartBadge: {
     position: 'absolute',
-    top: -5,
-    right: -5,
+    top: -6,
+    right: -6,
     backgroundColor: Colors.errorColor,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    borderRadius: 12, // Increased border radius
+    minWidth: 24, // Increased width
+    height: 24, // Increased height
     justifyContent: 'center',
     alignItems: 'center',
   },
   cartBadgeText: {
-    color: Colors.primaryText,
-    fontSize: 12,
+    color: '#FFFFFF', // White text for red badge
+    fontSize: 13, // Slightly increased font size
     fontWeight: 'bold',
   },
   searchContainer: {
@@ -781,7 +782,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   categoryButtonTextSelected: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   petTypeContainer: {
@@ -818,26 +819,27 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   petTypeButtonTextSelected: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   productsContainer: {
     flex: 1,
-    paddingHorizontal: 15,
+    paddingHorizontal: 0, // Remove extra padding since grid has its own
     marginTop: 5,
   },
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingBottom: 20,
+    paddingHorizontal: 15,
+    gap: 15, // Equal spacing between all cards
   },
   productCard: {
-    width: (width - 60) / 2,
+    width: (width - 60) / 2, // Adjusted for better responsive sizing
     backgroundColor: Colors.cardBackground,
     borderRadius: 12,
     marginBottom: 15,
-    marginHorizontal: 5,
     shadowColor: Colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -893,7 +895,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondaryText,
   },
   addToCartButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontSize: 11,
     fontWeight: '600',
     textAlign: 'center',
@@ -1016,7 +1018,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkoutButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -1162,7 +1164,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   placeOrderButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
 });

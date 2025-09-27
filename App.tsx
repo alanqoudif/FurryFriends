@@ -225,19 +225,19 @@ function MainAppNavigator() {
         }} 
       />
       <Tab.Screen 
-        name="Pets" 
-        component={PetsScreen} 
-        options={{ 
-          title: 'حيواناتي',
-          headerTitle: 'حيواناتي الأليفة'
-        }} 
-      />
-      <Tab.Screen 
         name="Store" 
         component={StoreScreen} 
         options={{ 
           title: 'المتجر',
           headerTitle: 'متجر الحيوانات الأليفة'
+        }} 
+      />
+      <Tab.Screen 
+        name="Pets" 
+        component={PetsScreen} 
+        options={{ 
+          title: 'حيواناتي',
+          headerTitle: 'حيواناتي الأليفة'
         }} 
       />
       <Tab.Screen 

@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   },
   confirmButtonText: {
     fontSize: 16,
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
 });

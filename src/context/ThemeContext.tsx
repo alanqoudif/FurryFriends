@@ -17,41 +17,27 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<ThemeMode>('dark');
+  // Force light mode only
+  const [theme, setTheme] = useState<ThemeMode>('light');
 
-  useEffect(() => {
-    loadTheme();
-  }, []);
+  // Remove theme loading and saving functionality
+  // const loadTheme = async () => {
+  //   // Disabled - always use light mode
+  // };
 
-  const loadTheme = async () => {
-    try {
-      const savedTheme = await AsyncStorage.getItem('theme');
-      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-        setTheme(savedTheme as ThemeMode);
-      }
-    } catch (error) {
-      console.error('Error loading theme:', error);
-    }
-  };
-
-  const saveTheme = async (newTheme: ThemeMode) => {
-    try {
-      await AsyncStorage.setItem('theme', newTheme);
-    } catch (error) {
-      console.error('Error saving theme:', error);
-    }
-  };
+  // const saveTheme = async (newTheme: ThemeMode) => {
+  //   // Disabled - always use light mode
+  // };
 
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    saveTheme(newTheme);
+    // Disabled - no theme switching allowed
+    console.log('Theme switching is disabled - app is set to light mode only');
   };
 
   const value: ThemeContextType = {
-    theme,
+    theme: 'light', // Always light mode
     toggleTheme,
-    isDark: theme === 'dark',
+    isDark: false, // Always false for light mode
   };
 
   return (
