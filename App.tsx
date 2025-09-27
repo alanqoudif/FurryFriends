@@ -9,6 +9,7 @@ import { BlurView } from 'expo-blur';
 import Colors from './src/constants/Colors';
 import { configureRTL } from './src/utils/RTLUtils';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { ThemeProvider, useTheme, useThemeColors } from './src/context/ThemeContext';
 
 // Configure RTL for Arabic
 configureRTL();
@@ -25,8 +26,11 @@ import ProfileScreen from './src/screens/ProfileScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Dark Theme Glass Morphism Tab Bar Component
+// Theme-aware Glass Morphism Tab Bar Component
 function CustomTabBar({ state, descriptors, navigation }: any) {
+  const { isDark } = useTheme();
+  const colors = useThemeColors();
+  
   return (
     <View
       style={{
@@ -38,29 +42,29 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         overflow: 'hidden',
-        shadowColor: Colors.shadowColor,
+        shadowColor: colors.shadowColor,
         shadowOffset: {
           width: 0,
           height: -4,
         },
-        shadowOpacity: Colors.shadowOpacity,
-        shadowRadius: Colors.shadowRadius,
+        shadowOpacity: colors.shadowOpacity,
+        shadowRadius: colors.shadowRadius,
         elevation: 15,
       }}
     >
       <BlurView
         intensity={90}
-        tint="dark"
+        tint={isDark ? "dark" : "light"}
         style={{
           flex: 1,
-          backgroundColor: Colors.glassBackground,
+          backgroundColor: colors.glassBackground,
           borderTopLeftRadius: 25,
           borderTopRightRadius: 25,
           borderWidth: 1,
-          borderColor: Colors.glassBorder,
+          borderColor: colors.glassBorder,
         }}
       >
-        {/* Dark Theme Top Border */}
+        {/* Theme-aware Top Border */}
         <View
           style={{
             position: 'absolute',
@@ -68,7 +72,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             left: 0,
             right: 0,
             height: 1,
-            backgroundColor: Colors.glassHighlight,
+            backgroundColor: colors.glassHighlight,
             borderTopLeftRadius: 25,
             borderTopRightRadius: 25,
           }}
@@ -145,8 +149,8 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
               borderRadius: 16,
               marginHorizontal: 2,
               backgroundColor: isFocused 
-                ? Colors.activeTabBackground 
-                : Colors.inactiveTabBackground,
+                ? colors.activeTabBackground 
+                : colors.inactiveTabBackground,
               transform: [{ scale: isFocused ? 1.05 : 1 }],
             }}
             activeOpacity={0.7}
@@ -161,12 +165,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
               <Ionicons
                 name={iconName}
                 size={isFocused ? 26 : 24}
-                color={isFocused ? Colors.primaryAccent : Colors.secondaryText}
+                color={isFocused ? colors.primaryAccent : colors.secondaryText}
               />
               
               <Text
                 style={{
-                  color: isFocused ? Colors.primaryAccent : Colors.secondaryText,
+                  color: isFocused ? colors.primaryAccent : colors.secondaryText,
                   fontSize: isFocused ? 12 : 11,
                   fontWeight: isFocused ? '700' : '600',
                   marginTop: 4,
@@ -187,17 +191,19 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
 // Main App Navigator Component
 function MainAppNavigator() {
+  const colors = useThemeColors();
+  
   return (
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerStyle: {
-          backgroundColor: Colors.secondaryBackground,
+          backgroundColor: colors.secondaryBackground,
         },
-        headerTintColor: Colors.primaryText,
+        headerTintColor: colors.primaryText,
         headerTitleStyle: {
           fontWeight: 'bold',
-          color: Colors.primaryText,
+          color: colors.primaryText,
         },
       }}
     >
@@ -258,10 +264,12 @@ function AuthStackNavigator() {
 
 // Loading Screen Component
 function LoadingScreen() {
+  const colors = useThemeColors();
+  
   return (
-    <View style={loadingStyles.loadingContainer}>
-      <ActivityIndicator size="large" color={Colors.primaryAccent} />
-      <Text style={loadingStyles.loadingText}>جاري التحميل...</Text>
+    <View style={[loadingStyles.loadingContainer, { backgroundColor: colors.primaryBackground }]}>
+      <ActivityIndicator size="large" color={colors.primaryAccent} />
+      <Text style={[loadingStyles.loadingText, { color: colors.primaryText }]}>جاري التحميل...</Text>
     </View>
   );
 }
@@ -282,23 +290,32 @@ const loadingStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.primaryBackground,
   },
   loadingText: {
     marginTop: 20,
     fontSize: 16,
-    color: Colors.primaryText,
     textAlign: 'center',
   },
 });
 
+// Theme-aware App Content
+function ThemedAppContent() {
+  const colors = useThemeColors();
+  
+  return (
+    <NavigationContainer>
+      <StatusBar style={colors.statusBarStyle} backgroundColor={colors.statusBarBackground} />
+      <AppContent />
+    </NavigationContainer>
+  );
+}
+
 export default function App() {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <StatusBar style={Colors.statusBarStyle} backgroundColor={Colors.statusBarBackground} />
-        <AppContent />
-      </NavigationContainer>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ThemedAppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
