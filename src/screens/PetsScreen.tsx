@@ -54,6 +54,12 @@ const PetsScreen = () => {
     image: '',
     vaccinations: [] as Array<{ name: string; date: string; nextDue: string }>,
   });
+  
+  // New state for filtering and sorting
+  const [selectedAnimalType, setSelectedAnimalType] = useState<string>('قطة');
+  const [sortBy, setSortBy] = useState<string>('الاسم');
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [animalsDropdownVisible, setAnimalsDropdownVisible] = useState(false);
 
   useEffect(() => {
     loadPets();
@@ -167,6 +173,38 @@ const PetsScreen = () => {
     );
   };
 
+  // Filter and sort pets
+  const getFilteredAndSortedPets = () => {
+    let filteredPets = pets;
+
+    // Filter by animal type (only show selected animal type)
+    if (selectedAnimalType && animalOptions.includes(selectedAnimalType)) {
+      filteredPets = pets.filter(pet => pet.type === selectedAnimalType);
+    }
+
+    // Sort pets
+    const sortedPets = [...filteredPets].sort((a, b) => {
+      switch (sortBy) {
+        case 'الاسم':
+          return a.name.localeCompare(b.name, 'ar');
+        case 'النوع':
+          return a.type.localeCompare(b.type, 'ar');
+        case 'العمر':
+          return a.age.localeCompare(b.age, 'ar');
+        case 'السلالة':
+          return a.breed.localeCompare(b.breed, 'ar');
+        default:
+          return 0;
+      }
+    });
+
+    return sortedPets;
+  };
+
+  const animalTypes = ['الكل', 'كلب', 'قطة'];
+  const sortOptions = ['الاسم', 'النوع', 'العمر', 'السلالة'];
+  const animalOptions = ['قطة', 'كلب']; // Only cat and dog options
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -183,13 +221,98 @@ const PetsScreen = () => {
               style={styles.addButton}
               onPress={() => setModalVisible(true)}
             >
-              <Ionicons name="add" size={24} color={Colors.primaryText} />
+              <Ionicons name="add" size={24} color="#FFFFFF" />
               <Text style={styles.addButtonText}>إضافة حيوان</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {pets.length === 0 ? (
+        {/* Filter and Sort Row */}
+        <View style={styles.filterSortRow}>
+          {/* Sort Options Dropdown */}
+          <View style={styles.dropdownContainer}>
+            <TouchableOpacity
+              style={styles.dropdownButton}
+              onPress={() => setDropdownVisible(!dropdownVisible)}
+            >
+              <Text style={styles.dropdownButtonText}>{sortBy}</Text>
+              <Ionicons 
+                name={dropdownVisible ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color={Colors.primaryText} 
+              />
+            </TouchableOpacity>
+            
+            {dropdownVisible && (
+              <View style={styles.dropdownMenu}>
+                <Text style={styles.dropdownSectionTitle}>ترتيب حسب</Text>
+                {sortOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.dropdownItem,
+                      sortBy === option && styles.dropdownItemSelected
+                    ]}
+                    onPress={() => {
+                      setSortBy(option);
+                      setDropdownVisible(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.dropdownItemText,
+                      sortBy === option && styles.dropdownItemTextSelected
+                    ]}>
+                      {option}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Animals Dropdown */}
+          <View style={styles.dropdownContainer}>
+            <TouchableOpacity
+              style={styles.dropdownButton}
+              onPress={() => setAnimalsDropdownVisible(!animalsDropdownVisible)}
+            >
+              <Text style={styles.dropdownButtonText}>حيوانات</Text>
+              <Ionicons 
+                name={animalsDropdownVisible ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color={Colors.primaryText} 
+              />
+            </TouchableOpacity>
+            
+            {animalsDropdownVisible && (
+              <View style={styles.dropdownMenu}>
+                <Text style={styles.dropdownSectionTitle}>نوع الحيوان</Text>
+                {animalOptions.map((animal) => (
+                  <TouchableOpacity
+                    key={animal}
+                    style={[
+                      styles.dropdownItem,
+                      selectedAnimalType === animal && styles.dropdownItemSelected
+                    ]}
+                    onPress={() => {
+                      setSelectedAnimalType(animal);
+                      setAnimalsDropdownVisible(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.dropdownItemText,
+                      selectedAnimalType === animal && styles.dropdownItemTextSelected
+                    ]}>
+                      {animal}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+
+        {getFilteredAndSortedPets().length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="paw-outline" size={80} color={Colors.secondaryText} />
             <Text style={styles.emptyText}>لم يتم إضافة حيوانات أليفة بعد</Text>
@@ -197,7 +320,7 @@ const PetsScreen = () => {
           </View>
         ) : (
           <View style={styles.petsGrid}>
-            {pets.map((pet) => (
+            {getFilteredAndSortedPets().map((pet) => (
               <TouchableOpacity
                 key={pet.id}
                 style={styles.petCard}
@@ -441,7 +564,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   addButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
     marginLeft: 5,
   },
@@ -605,7 +728,7 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   pickerOptionTextSelected: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   vaccinationSection: {
@@ -672,7 +795,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   qrModalContent: {
@@ -708,8 +831,87 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   closeButtonText: {
+    color: '#FFFFFF', // White text for purple button
+    fontWeight: '600',
+  },
+  // Filter and Sort Row Styles
+  filterSortRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: Colors.secondaryBackground,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.glassBorder,
+    justifyContent: 'space-between',
+  },
+  dropdownContainer: {
+    flex: 1,
+    marginHorizontal: 5,
+    position: 'relative',
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.glassBackground,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  dropdownButtonText: {
+    fontSize: 14,
     color: Colors.primaryText,
     fontWeight: '600',
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.cardBackground,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    borderRadius: 8,
+    marginTop: 2,
+    zIndex: 1000,
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.glassBorder,
+  },
+  dropdownItemSelected: {
+    backgroundColor: Colors.primaryAccent,
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    color: Colors.primaryText,
+    fontWeight: '500',
+  },
+  dropdownItemTextSelected: {
+    color: '#FFFFFF', // White text for purple button
+    fontWeight: '600',
+  },
+  dropdownSection: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.glassBorder,
+  },
+  dropdownSectionTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.primaryAccent,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+    textAlign: 'center',
   },
 });
 

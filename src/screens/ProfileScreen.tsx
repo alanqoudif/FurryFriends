@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
+import { useTheme, useThemeColors } from '../context/ThemeContext';
 import Colors from '../constants/Colors';
 import Theme from '../constants/Theme';
 import { getRTLMargin, getTextAlign } from '../utils/RTLUtils';
@@ -51,6 +52,8 @@ interface Order {
 
 const ProfileScreen = () => {
   const { user, userData, logout } = useAuth();
+  const { isDark } = useTheme();
+  const colors = useThemeColors();
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
     email: '',
@@ -65,7 +68,6 @@ const ProfileScreen = () => {
   const [ordersModalVisible, setOrdersModalVisible] = useState(false);
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -501,38 +503,29 @@ const ProfileScreen = () => {
         visible={settingsModalVisible}
         onRequestClose={() => setSettingsModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.settingsModalContent}>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={[styles.settingsModalContent, { backgroundColor: colors.cardBackground }]}>
             <View style={styles.settingsHeader}>
-              <Text style={styles.settingsTitle}>الإعدادات</Text>
+              <Text style={[styles.settingsTitle, { color: colors.primaryText }]}>الإعدادات</Text>
               <TouchableOpacity onPress={() => setSettingsModalVisible(false)}>
-                <Ionicons name="close" size={24} color={Colors.secondaryText} />
+                <Ionicons name="close" size={24} color={colors.secondaryText} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.settingItem}>
-              <Text style={styles.settingLabel}>الإشعارات</Text>
+              <Text style={[styles.settingLabel, { color: colors.primaryText }]}>الإشعارات</Text>
               <Switch
                 value={notificationsEnabled}
                 onValueChange={setNotificationsEnabled}
-                trackColor={{ false: Colors.secondaryText, true: Colors.primaryAccent }}
-                thumbColor={notificationsEnabled ? Colors.primaryText : Colors.secondaryText}
+                trackColor={{ false: colors.secondaryText, true: colors.primaryAccent }}
+                thumbColor={notificationsEnabled ? colors.primaryText : colors.secondaryText}
               />
             </View>
 
-            <View style={styles.settingItem}>
-              <Text style={styles.settingLabel}>الوضع المظلم</Text>
-              <Switch
-                value={darkModeEnabled}
-                onValueChange={setDarkModeEnabled}
-                trackColor={{ false: Colors.secondaryText, true: Colors.primaryAccent }}
-                thumbColor={darkModeEnabled ? Colors.primaryText : Colors.secondaryText}
-              />
-            </View>
 
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Ionicons name="log-out-outline" size={20} color={Colors.errorColor} />
-              <Text style={styles.logoutButtonText}>تسجيل الخروج</Text>
+            <TouchableOpacity style={[styles.logoutButton, { backgroundColor: colors.errorColor }]} onPress={handleLogout}>
+              <Ionicons name="log-out-outline" size={20} color={colors.primaryText} />
+              <Text style={[styles.logoutButtonText, { color: colors.primaryText }]}>تسجيل الخروج</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -573,7 +566,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple header
     marginBottom: 5,
   },
   profileEmail: {
@@ -696,7 +689,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   paymentModalContent: {

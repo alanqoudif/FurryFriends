@@ -14,9 +14,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useThemeColors } from '../context/ThemeContext';
 import Colors from '../constants/Colors';
 import Theme from '../constants/Theme';
-import { getRTLMargin, getTextAlign } from '../utils/RTLUtils';
+import { getRTLMargin, getRTLPadding, getTextAlign } from '../utils/RTLUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -24,7 +25,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  image: string;
+  image: string | any;
   category: 'food' | 'accessories' | 'toys' | 'health';
   petType: 'cat' | 'dog' | 'both';
   description: string;
@@ -37,6 +38,7 @@ interface CartItem {
 }
 
 const StoreScreen = () => {
+  const colors = useThemeColors();
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -242,29 +244,29 @@ const StoreScreen = () => {
     // Add animation
     setAnimatingItems(prev => new Set([...prev, product.id]));
     
-    // Enhanced cart animation with bounce effect
+    // Enhanced cart animation with bounce effect (reduced duration)
     Animated.sequence([
       Animated.timing(cartAnimation, {
         toValue: 1,
-        duration: 150,
+        duration: 80, // Reduced from 150ms to 80ms
         useNativeDriver: true,
       }),
       Animated.spring(cartAnimation, {
         toValue: 0,
-        tension: 100,
-        friction: 3,
+        tension: 150, // Increased tension for faster spring
+        friction: 4, // Increased friction for quicker settling
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Remove from animating items after animation
+    // Remove from animating items after animation (reduced timeout)
     setTimeout(() => {
       setAnimatingItems(prev => {
         const newSet = new Set(prev);
         newSet.delete(product.id);
         return newSet;
       });
-    }, 1200);
+    }, 600); // Reduced from 1200ms to 600ms for faster cleanup
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -347,12 +349,11 @@ const StoreScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>متجر الحيوانات الأليفة</Text>
+    <View style={[styles.container, { backgroundColor: colors.primaryBackground }]}>
+      {/* Cart Button - Positioned in top right */}
+      <View style={styles.cartButtonContainer}>
         <TouchableOpacity
-          style={styles.cartButton}
+          style={[styles.cartButton, { backgroundColor: colors.primaryAccent }]}
           onPress={() => setCartModalVisible(true)}
         >
           <Animated.View
@@ -367,106 +368,127 @@ const StoreScreen = () => {
               ],
             }}
           >
-            <Ionicons name="cart" size={24} color={Colors.primaryText} />
+            <Ionicons name="cart" size={20} color={colors.primaryText} />
           </Animated.View>
           {getTotalItems() > 0 && (
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{getTotalItems()}</Text>
+            <View style={[styles.cartBadge, { backgroundColor: colors.errorColor }]}>
+              <Text style={[styles.cartBadgeText, { color: '#FFFFFF' }]}>{getTotalItems()}</Text>
             </View>
           )}
         </TouchableOpacity>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color={Colors.secondaryText} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="البحث عن المنتجات..."
-          placeholderTextColor={Colors.secondaryText}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
+      {/* Compact Filter Section */}
+      <View style={styles.filterSection}>
+        {/* Search Bar */}
+        <View style={[styles.searchContainer, { backgroundColor: colors.cardBackground, borderColor: colors.glassBorder }]}>
+          <Ionicons name="search" size={16} color={colors.secondaryText} style={styles.searchIcon} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.primaryText }]}
+            placeholder="البحث..."
+            placeholderTextColor={colors.secondaryText}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
 
-      {/* Category Filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category.id}
-            style={[
-              styles.categoryButton,
-              selectedCategory === category.id && styles.categoryButtonSelected,
-            ]}
-            onPress={() => setSelectedCategory(category.id)}
-          >
+        {/* Category Filter */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category.id}
+              style={[
+                styles.categoryButton,
+                { backgroundColor: colors.cardBackground, borderColor: colors.glassBorder },
+                selectedCategory === category.id && { backgroundColor: colors.primaryAccent, borderColor: colors.primaryAccent },
+              ]}
+              onPress={() => setSelectedCategory(category.id)}
+            >
             <Ionicons
               name={category.icon as any}
-              size={20}
-              color={selectedCategory === category.id ? Colors.primaryText : Colors.secondaryText}
+              size={16}
+              color={selectedCategory === category.id ? '#FFFFFF' : colors.secondaryText}
             />
-            <Text
-              style={[
-                styles.categoryButtonText,
-                selectedCategory === category.id && styles.categoryButtonTextSelected,
-              ]}
-            >
-              {category.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text
+                style={[
+                  styles.categoryButtonText,
+                  { color: selectedCategory === category.id ? '#FFFFFF' : colors.primaryText },
+                  selectedCategory === category.id && { fontWeight: '600' },
+                ]}
+              >
+                {category.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-      {/* Pet Type Filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.petTypeContainer}>
-        {petTypes.map((petType) => (
-          <TouchableOpacity
-            key={petType.id}
-            style={[
-              styles.petTypeButton,
-              selectedPetType === petType.id && styles.petTypeButtonSelected,
-            ]}
-            onPress={() => setSelectedPetType(petType.id)}
-          >
+        {/* Pet Type Filter */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.petTypeContainer}>
+          {petTypes.map((petType) => (
+            <TouchableOpacity
+              key={petType.id}
+              style={[
+                styles.petTypeButton,
+                { backgroundColor: colors.cardBackground, borderColor: colors.glassBorder },
+                selectedPetType === petType.id && { backgroundColor: colors.successColor, borderColor: colors.successColor },
+              ]}
+              onPress={() => setSelectedPetType(petType.id)}
+            >
             <Ionicons
               name={petType.icon as any}
-              size={20}
-              color={selectedPetType === petType.id ? Colors.primaryText : Colors.secondaryText}
+              size={14}
+              color={selectedPetType === petType.id ? '#FFFFFF' : colors.secondaryText}
             />
-            <Text
-              style={[
-                styles.petTypeButtonText,
-                selectedPetType === petType.id && styles.petTypeButtonTextSelected,
-              ]}
-            >
-              {petType.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text
+                style={[
+                  styles.petTypeButtonText,
+                  { color: selectedPetType === petType.id ? '#FFFFFF' : colors.primaryText },
+                  selectedPetType === petType.id && { fontWeight: '600' },
+                ]}
+              >
+                {petType.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Products Grid */}
-      <ScrollView style={styles.productsContainer}>
+      <ScrollView 
+        style={styles.productsContainer}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 }}
+      >
         <View style={styles.productsGrid}>
           {filteredProducts.map((product) => (
             <Animated.View 
               key={product.id} 
               style={[
                 styles.productCard,
-                animatingItems.has(product.id) && styles.productCardAnimating
+                { backgroundColor: colors.cardBackground, borderColor: colors.glassBorder },
+                animatingItems.has(product.id) && { 
+                  transform: [{ scale: 1.05 }],
+                  backgroundColor: 'rgba(138, 43, 226, 0.1)',
+                  borderColor: colors.successColor,
+                  borderWidth: 2,
+                }
               ]}
             >
-              <Image source={{ uri: product.image }} style={styles.productImage} />
+              <Image 
+                source={typeof product.image === 'string' ? { uri: product.image } : product.image} 
+                style={styles.productImage} 
+              />
               <View style={styles.productInfo}>
-                <Text style={styles.productName}>{product.name}</Text>
-                <Text style={styles.productDescription}>{product.description}</Text>
+                <Text style={[styles.productName, { color: colors.primaryText }]}>{product.name}</Text>
+                <Text style={[styles.productDescription, { color: colors.secondaryText }]}>{product.description}</Text>
                 <View style={styles.productFooter}>
-                  <Text style={styles.productPrice}>{product.price.toFixed(2)} ريال</Text>
+                  <Text style={[styles.productPrice, { color: colors.primaryAccent }]}>{product.price.toFixed(2)} ريال</Text>
                   <TouchableOpacity
                     style={[
                       styles.addToCartButton,
-                      !product.inStock && styles.addToCartButtonDisabled,
-                      animatingItems.has(product.id) && styles.addToCartButtonAnimating,
+                      { backgroundColor: colors.primaryAccent },
+                      !product.inStock && { backgroundColor: colors.secondaryText },
+                      animatingItems.has(product.id) && { backgroundColor: colors.successColor, transform: [{ scale: 1.1 }] },
                     ]}
                     onPress={() => addToCart(product)}
                     disabled={!product.inStock}
@@ -474,7 +496,7 @@ const StoreScreen = () => {
                     <Text
                       style={[
                         styles.addToCartButtonText,
-                        !product.inStock && styles.addToCartButtonTextDisabled,
+                        { color: '#FFFFFF' }, // White text for purple button
                       ]}
                     >
                       {animatingItems.has(product.id) ? 'تم الإضافة!' : (product.inStock ? 'إضافة للسلة' : 'نفد المخزون')}
@@ -494,12 +516,12 @@ const StoreScreen = () => {
         visible={cartModalVisible}
         onRequestClose={() => setCartModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.cartModalContent}>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={[styles.cartModalContent, { backgroundColor: colors.cardBackground, borderColor: colors.glassBorder }]}>
             <View style={styles.cartHeader}>
-              <Text style={styles.cartTitle}>سلة التسوق</Text>
+              <Text style={[styles.cartTitle, { color: colors.primaryText }]}>سلة التسوق</Text>
               <TouchableOpacity onPress={() => setCartModalVisible(false)}>
-                <Ionicons name="close" size={24} color={Colors.secondaryText} />
+                <Ionicons name="close" size={24} color={colors.secondaryText} />
               </TouchableOpacity>
             </View>
 
@@ -513,7 +535,10 @@ const StoreScreen = () => {
                 <ScrollView style={styles.cartItems}>
                   {cart.map((item) => (
                     <View key={item.product.id} style={styles.cartItem}>
-                      <Image source={{ uri: item.product.image }} style={styles.cartItemImage} />
+                      <Image 
+                        source={typeof item.product.image === 'string' ? { uri: item.product.image } : item.product.image} 
+                        style={styles.cartItemImage} 
+                      />
                       <View style={styles.cartItemInfo}>
                         <Text style={styles.cartItemName}>{item.product.name}</Text>
                         <Text style={styles.cartItemPrice}>{item.product.price.toFixed(2)} ريال</Text>
@@ -558,8 +583,8 @@ const StoreScreen = () => {
         visible={checkoutModalVisible}
         onRequestClose={() => setCheckoutModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.checkoutModalContent}>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={[styles.checkoutModalContent, { backgroundColor: colors.cardBackground, borderColor: colors.glassBorder }]}>
             <View style={styles.checkoutHeader}>
               <Text style={styles.checkoutTitle}>تأكيد الطلب</Text>
               <TouchableOpacity onPress={() => setCheckoutModalVisible(false)}>
@@ -661,157 +686,164 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.primaryBackground,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: Colors.secondaryBackground,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.glassBorder,
+  cartButtonContainer: {
+    position: 'absolute',
+    bottom: 100, // Positioned in bottom left (above tab bar)
+    left: 20, // Left side positioning
+    zIndex: 1000, // Higher z-index to ensure it's on top
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.primaryText,
-    textAlign: getTextAlign(),
+  filterSection: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: 'transparent',
   },
   cartButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primaryAccent,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 14, // Slightly reduced for corner positioning
+    paddingVertical: 8, // Slightly reduced for corner positioning
+    borderRadius: 18, // Slightly reduced for corner positioning
     position: 'relative',
+    minHeight: 40, // Slightly reduced for corner positioning
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // Add shadow for better visibility
   },
   cartBadge: {
     position: 'absolute',
     top: -5,
     right: -5,
     backgroundColor: Colors.errorColor,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    borderRadius: 10, // Adjusted for corner positioning
+    minWidth: 20, // Adjusted for corner positioning
+    height: 20, // Adjusted for corner positioning
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.cardBackground, // White border for better visibility
   },
   cartBadgeText: {
-    color: Colors.primaryText,
-    fontSize: 12,
+    color: '#FFFFFF', // White text for red badge
+    fontSize: 13, // Slightly increased font size
     fontWeight: 'bold',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.cardBackground,
-    margin: 20,
-    paddingHorizontal: 15,
-    borderRadius: 25,
+    marginBottom: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 15,
     shadowColor: Colors.shadowColor,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
     borderWidth: 1,
     borderColor: Colors.glassBorder,
   },
   searchIcon: {
-    marginRight: 10,
+    ...getRTLMargin(0, 10),
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingVertical: 4,
+    fontSize: 13,
     color: Colors.primaryText,
   },
   categoryContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 5,
+    marginBottom: 6,
   },
   categoryButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginRight: 6,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 8,
+    borderRadius: 20,
     backgroundColor: Colors.cardBackground,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: Colors.glassBorder,
-    minWidth: 60,
-    height: 28,
+    minWidth: 80,
+    height: 36,
     justifyContent: 'center',
     shadowColor: Colors.shadowColor,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   categoryButtonSelected: {
     backgroundColor: Colors.primaryAccent,
     borderColor: Colors.primaryAccent,
   },
   categoryButtonText: {
-    marginLeft: 3,
-    fontSize: 11,
+    ...getRTLMargin(4, 0),
+    fontSize: 13,
     color: Colors.primaryText,
     textAlign: 'center',
     fontWeight: '500',
   },
   categoryButtonTextSelected: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   petTypeContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 15,
+    marginBottom: 8,
   },
   petTypeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     marginRight: 6,
-    borderRadius: 8,
+    borderRadius: 18,
     backgroundColor: Colors.cardBackground,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: Colors.glassBorder,
-    minWidth: 80,
-    height: 28,
+    minWidth: 70,
+    height: 32,
     justifyContent: 'center',
     shadowColor: Colors.shadowColor,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   petTypeButtonSelected: {
     backgroundColor: Colors.successColor,
     borderColor: Colors.successColor,
   },
   petTypeButtonText: {
-    marginLeft: 3,
-    fontSize: 11,
+    ...getRTLMargin(3, 0),
+    fontSize: 12,
     color: Colors.primaryText,
     textAlign: 'center',
     fontWeight: '500',
   },
   petTypeButtonTextSelected: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   productsContainer: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0, // Remove extra padding since grid has its own
+    marginTop: 5,
   },
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    paddingBottom: 20,
+    paddingHorizontal: 15,
+    gap: 15, // Equal spacing between all cards
   },
   productCard: {
-    width: (width - 60) / 2,
+    width: (width - 60) / 2, // Adjusted for better responsive sizing
     backgroundColor: Colors.cardBackground,
     borderRadius: 12,
     marginBottom: 15,
@@ -822,12 +854,12 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderWidth: 1,
     borderColor: Colors.glassBorder,
+    overflow: 'hidden',
   },
   productImage: {
     width: '100%',
     height: 120,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    resizeMode: 'cover',
   },
   productInfo: {
     padding: 12,
@@ -837,16 +869,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.primaryText,
     marginBottom: 4,
+    textAlign: getTextAlign(),
+    lineHeight: 18,
   },
   productDescription: {
     fontSize: 12,
     color: Colors.secondaryText,
     marginBottom: 8,
+    textAlign: getTextAlign(),
+    lineHeight: 16,
   },
   productFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
   productPrice: {
     fontSize: 16,
@@ -855,17 +892,20 @@ const styles = StyleSheet.create({
   },
   addToCartButton: {
     backgroundColor: Colors.primaryAccent,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
   },
   addToCartButtonDisabled: {
     backgroundColor: Colors.secondaryText,
   },
   addToCartButtonText: {
-    color: Colors.primaryText,
-    fontSize: 12,
+    color: '#FFFFFF', // White text for purple button
+    fontSize: 11,
     fontWeight: '600',
+    textAlign: 'center',
   },
   addToCartButtonTextDisabled: {
     color: Colors.primaryText,
@@ -884,6 +924,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
+    zIndex: 1000,
   },
   cartModalContent: {
     backgroundColor: Colors.cardBackground,
@@ -928,7 +969,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 8,
-    marginRight: 15,
+    ...getRTLMargin(0, 15),
   },
   cartItemInfo: {
     flex: 1,
@@ -984,7 +1025,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkoutButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -1095,7 +1136,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(138, 43, 226, 0.1)',
   },
   paymentOptionText: {
-    marginLeft: 5,
+    ...getRTLMargin(5, 0),
     fontSize: 14,
     color: Colors.secondaryText,
   },
@@ -1130,7 +1171,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   placeOrderButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
 });

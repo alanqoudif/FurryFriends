@@ -66,7 +66,7 @@ export const Theme = {
   },
   
   primaryButtonText: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple buttons
     fontSize: 16,
     fontWeight: '600',
   },

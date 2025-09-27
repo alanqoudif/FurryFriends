@@ -196,7 +196,7 @@ const AppointmentBooking: React.FC<AppointmentBookingProps> = ({
                       ]}
                       onPress={() => setAppointmentDetails({ ...appointmentDetails, petType: 'كلب' })}
                     >
-                      <Ionicons name="paw" size={20} color={appointmentDetails.petType === 'كلب' ? Colors.primaryText : Colors.secondaryText} />
+                      <Ionicons name="paw" size={20} color={appointmentDetails.petType === 'كلب' ? '#FFFFFF' : Colors.secondaryText} />
                       <Text style={[
                         styles.petTypeButtonText,
                         appointmentDetails.petType === 'كلب' && styles.petTypeButtonTextSelected
@@ -211,7 +211,7 @@ const AppointmentBooking: React.FC<AppointmentBookingProps> = ({
                       ]}
                       onPress={() => setAppointmentDetails({ ...appointmentDetails, petType: 'قطة' })}
                     >
-                      <Ionicons name="logo-octocat" size={20} color={appointmentDetails.petType === 'قطة' ? Colors.primaryText : Colors.secondaryText} />
+                      <Ionicons name="logo-octocat" size={20} color={appointmentDetails.petType === 'قطة' ? '#FFFFFF' : Colors.secondaryText} />
                       <Text style={[
                         styles.petTypeButtonText,
                         appointmentDetails.petType === 'قطة' && styles.petTypeButtonTextSelected
@@ -226,7 +226,7 @@ const AppointmentBooking: React.FC<AppointmentBookingProps> = ({
                       ]}
                       onPress={() => setAppointmentDetails({ ...appointmentDetails, petType: 'أخرى' })}
                     >
-                      <Ionicons name="paw-outline" size={20} color={appointmentDetails.petType === 'أخرى' ? Colors.primaryText : Colors.secondaryText} />
+                      <Ionicons name="paw-outline" size={20} color={appointmentDetails.petType === 'أخرى' ? '#FFFFFF' : Colors.secondaryText} />
                       <Text style={[
                         styles.petTypeButtonText,
                         appointmentDetails.petType === 'أخرى' && styles.petTypeButtonTextSelected
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   petTypeButtonTextSelected: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   progressContainer: {
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   progressStepTextActive: {
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple progress step
   },
   progressLine: {
     width: 40,
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
   nextButtonText: {
     marginRight: 5,
     fontSize: 16,
-    color: Colors.primaryText,
+    color: '#FFFFFF', // White text for purple button
     fontWeight: '600',
   },
   submitButton: {
